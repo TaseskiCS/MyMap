@@ -8,7 +8,7 @@ export default function Home() {
     <>
     <div className="flex justify-center items-center">
       <div className='flex flex-col sm:flex-row  justify-center items-center'>
-        <div className=''>
+        <div>
             <img className="w-80"src='/png/mymap-logo.png'></img>
         </div>
         <div className='flex justify-center items-center flex-col'>
@@ -19,7 +19,7 @@ export default function Home() {
       </div>
     </div>
     <div className='flex justify-center items-center'>
-      <Link className='shadow-2xl w-full flex justify-center mx-10 p-5 bg-indigo-500 rounded-lg text-white text-xl' href="/register">Get Started</Link>
+      <Link className='max-w-2xl shadow-2xl w-full flex justify-center mx-10 p-5 bg-indigo-500 rounded-lg text-white text-xl' href="/register">Get Started</Link>
     </div>
 
     <div className='mt-20 mb-10'>
