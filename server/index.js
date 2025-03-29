@@ -33,7 +33,6 @@ app.post('/data/views', viewsData);
 
 app.get('/get/:username', getUserData);
 
-// app.get('/get/socials/:username', getUserSocials);
 
 app.post('/save/socials', saveSocials);
 app.post('/save/profile', saveProfile);

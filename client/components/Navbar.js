@@ -1,74 +1,141 @@
-import Link from 'next/link'
-import { useRouter } from 'next/router'
-import { useEffect, useState } from "react";
+"use client"
 
-const NavBar = () => {
-    const router = useRouter()
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+import { useEffect, useState } from "react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { motion } from "framer-motion"
+import { Menu } from "lucide-react"
 
-    const toggleMobileMenu = () => {
-        setMobileMenuOpen(!mobileMenuOpen);
-    };
-    useEffect(()=>{
-        setMobileMenuOpen(false);
 
-        const token = localStorage.getItem('MyMapToken');
-        if (token) {
-        setIsLoggedIn(true); // User is logged in
-        } else {
-        setIsLoggedIn(false); // User is not logged in
-        }
-    }, [router.asPath])
+export default function Navbar() {
+  const pathname = usePathname()
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
 
-    const logout = () => {
-        localStorage.removeItem('MyMapToken'); 
-        setIsLoggedIn(false); 
-        router.push('/');
-      };
+  // Check if user is logged in
+  useEffect(() => {
+    const token = localStorage.getItem("MyMapToken")
+    setIsLoggedIn(!!token)
 
-    return (
-    <>    
-        <nav className="bg-transparent border-b-2 border-indigo-300">
-        <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-            <Link href="/" className="flex items-center">
-                <img src="/png/mymap-Logo.png" className="w-12 mr-3" alt="Company Logo" />
-                <span className="self-center text-xl font-semibold whitespace-nowrap text-black">MyMap</span>
-            </Link>
-            <button onClick={toggleMobileMenu} data-collapse-toggle="navbar-default" type="button" className="inline-flex items-center p-2 ml-3 text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="navbar-default" aria-expanded="false">
-            <span className="sr-only">Open main menu</span>
-            <svg className="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd"></path></svg>
+    // Add scroll listener for navbar background change
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10)
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [pathname])
+
+  const logout = () => {
+    localStorage.removeItem("MyMapToken")
+    setIsLoggedIn(false)
+    window.location.href = "/"
+  }
+
+  const navLinks = [
+    { href: "/", label: "Home" },
+    ...(isLoggedIn ? [{ href: "/dashboard", label: "Dashboard" }] : [{ href: "/register", label: "Register" }]),
+  ]
+
+  return (
+    <motion.header
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.5 }}
+      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+        isScrolled
+          ? "bg-white/80 backdrop-blur-md border-b border-border shadow-sm"
+          : "bg-transparent border-b-2 border-primary/20"
+      }`}
+    >
+      <div className="container flex h-16 items-center justify-between">
+        <Link href="/" className="flex items-center gap-2">
+          <motion.div whileHover={{ rotate: 10 }} transition={{ type: "spring", stiffness: 400, damping: 10 }}>
+            <img src="/png/mymap-Logo.png" className="w-10 h-10" alt="MyMap Logo" />
+          </motion.div>
+          <span className="font-semibold text-xl tracking-tight">MyMap</span>
+        </Link>
+
+        {/* Desktop Navigation */}
+        <nav className="flex items-center gap-6">
+          <ul className="flex gap-6 mr-5">
+            {navLinks.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className={`relative text-sm font-medium transition-colors hover:text-primary ${
+                    pathname === link.href ? "text-primary" : "text-foreground/70"
+                  }`}
+                >
+                  {link.label}
+                  {pathname === link.href && (
+                    <motion.div
+                      layoutId="navbar-indicator"
+                      className="absolute -bottom-[21px] left-0 right-0 h-[2px] bg-primary"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.2 }}
+                    />
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+          {isLoggedIn && (
+            <button
+              onClick={logout}
+              className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+            >
+              Log Out
             </button>
-            <div className={`${mobileMenuOpen ? "" : "hidden"} z-50 w-full md:block md:w-auto focus:outline-none`} id="navbar-default">                                  {/* bg of mobile bar */}  {/* bg of nornal size bar */}
-            <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg  md:flex-row md:space-x-8 md:mt-0 md:border-0 bg-gray-600 md:bg-transparent  dark:border-gray-700">
-                <li>
-                <Link href="/" className="text-lg block py-2 pl-3 pr-4 active:bg-blue-700 text-black rounded md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500" aria-current="page">Home</Link>
-                </li>
-                {!isLoggedIn && (
-                <li>
-                <Link href="/register" className="text-lg block py-2 pl-3 pr-4 active:bg-blue-700 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-black md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Register</Link>
-                </li>
-              )}
-                {isLoggedIn && (
-                <>
-                  <li>
-                    <Link href="/dashboard" className="text-lg block py-2 pl-3 pr-4 active:bg-blue-700 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-black md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">
-                      Dashboard
-                    </Link>
-                  </li>
-                  <li>
-                    <button onClick={logout} className="text-lg text-red-500 hover:text-red-700">
-                      Log Out
-                    </button>
-                  </li>
-                </>
-              )}
-            </ul>
-            </div>
-        </div>
+          )}
         </nav>
-    </>
-    )
+
+        {/* Mobile Navigation */}
+        
+            {/* <button size="icon" className="md:hidden">
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle menu</span>
+            </button>
+         
+          
+            <div className="flex flex-col h-full">
+              <div className="flex items-center justify-between border-b pb-4">
+                <Link href="/" className="flex items-center gap-2">
+                  <img src="/png/mymap-Logo.png" className="w-8 h-8" alt="MyMap Logo" />
+                  <span className="font-semibold">MyMap</span>
+                </Link>
+              </div>
+              <nav className="flex flex-col gap-6 mt-8">
+                <ul className="grid gap-5">
+                  {navLinks.map((link) => (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        className={`text-lg font-medium transition-colors hover:text-primary ${
+                          pathname === link.href ? "text-primary" : "text-foreground/70"
+                        }`}
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+
+                {isLoggedIn && (
+                  <button
+                    onClick={logout}
+                    
+                    className="justify-start px-0 text-destructive hover:text-destructive/90 hover:bg-transparent"
+                  >
+                    Log Out
+                  </button>
+                )}
+              </nav>
+            </div> */}
+      </div>
+    </motion.header>
+  )
 }
 
-export default NavBar
